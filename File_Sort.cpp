@@ -1,4 +1,4 @@
-// File_Sort.cpp: определяет точку входа для консольного приложения.
+// File_Sort.cpp: 
 //
  
 #include "stdafx.h"
@@ -17,18 +17,18 @@
 
 using namespace std;
 
-//Генерация бинарного файла размером 1 ГГб
-//если в каталоге уже есть random_digits.bin, 
-//то содержимое файла переписывается новыми значениями
+//Generate binary file size of 1 Gb
+//If random_digits.bin exists in project path, 
+//then file will be replaced
 void generate_bin_file(char * file_name)
 {
 	uint32_t i=0, j=0;
 	
 	cout << "Start generation " << file_name <<" . . ." << endl;
 
-	// инициализация датчика случайных чисел	
+	//random generator	
 	srand((int)time(NULL));  		
-	// открываем файл для записи 
+	// open file to record 
 	ofstream outstrm (file_name, ios_base::trunc | std::ios::binary);
 
 	if(outstrm.is_open())
@@ -36,7 +36,7 @@ void generate_bin_file(char * file_name)
 		uint32_t *buf = new uint32_t[BUF_LENTH];
 		random_device rd;   
 		mt19937 gen(rd());
-		//Запись в файл блоков рандомных чисе
+		//record fandom digits into file
 		for (j = 0; j < BUF_NUMBER; j++)
 		{
 			for(i = 0; i < BUF_LENTH; i++)
@@ -59,9 +59,9 @@ int comp(const void *i, const void *j)
 	return *(int *)i - *(int *)j;
 }
 
-//Считывает поблочно файл. Каждый блок сортируется библиотечной ф-цией qsort и
-//а записывается в новый файл random_digits_sorted.bin
-//На выходе получаем новый частично отсортированный файл.
+//Read file by blocks. Each block is sorted standard function qsort and
+//then will be written into new temp file random_digits_sorted.bin
+//Such way there is partly sorted file.
 int part_sort(char *file_name)
 {
 	uint32_t * buffer = new uint32_t[BUF_LENTH];
@@ -154,17 +154,17 @@ void merge_buffer(uint32_t *buf)
 	delete temp_buf;
 }
 
-//Внешняя сортировка файла
+//External sort
 int merge_sort(char *file_name)
 {
 
-	uint32_t i=BUF_NUMBER; //счетчик сортируемого полублока от конца файла
-	uint32_t j=0;	//счетчик сортируемого полублока от начала файла	
+	uint32_t i=BUF_NUMBER;//Counter sorted half-block from the end of file
+	uint32_t j=0;	//Counter sorted half-block from the start of file		
 	char sorted_file_name[120];
 	const uint32_t half_buf_size = BUF_SIZE/2;
 	sprintf_s(sorted_file_name,120,"sorted_%s",file_name);
 	cout << "Start external sort of "<< sorted_file_name <<" . . ." << endl;
-	//открываем поблочно отсортированный файл
+	
 	fstream sorted_file(sorted_file_name, std::ios::in | std::ios::out | std::ios::binary);
 
 	if (sorted_file.is_open())
@@ -227,7 +227,7 @@ int merge_sort(char *file_name)
 	return 1;	
 }
 
-//Проверка сортировки файла
+//Check sorting
 int check(char *file_name)
 {
 	uint32_t base_val=0;
@@ -289,16 +289,16 @@ int _tmain(int argc, _TCHAR* argv[])
     if (f == NULL)				
 		generate_bin_file(file_name);
 	else fclose(f);
-	// Разделим файл на файлы, которые можно отсотировать qsort,
-	//не съедая больше 300 Мб оперативки.
-	//Временные отсортированные файлы лежат в директории проекта temp_files
+	// Split file for some files that can be sorted with qsort,
+	//Block sizes are < 300 Mb.
+	//Temporary sorted files are into project directory temp_files
 	if (part_sort(file_name))
 		cout << "Error in split" << endl;
 	else
 	{
-		if (merge_sort(file_name)) //Сортировка слиянием	
+		if (merge_sort(file_name)) //merge sorting	
 			cout << "Error in externel sort" << endl;
-		else if (check(file_name)) //Проверка сортировки			
+		else if (check(file_name)) //sort checking				
 			cout << "Check error" << endl;
 	}
 	getchar();
